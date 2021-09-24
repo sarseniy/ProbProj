@@ -62,6 +62,33 @@ public:
 
         return static_cast<float>(good) / static_cast<float>(test_count);
     }
+
+    void convergence_test(State const& s) const {
+        std::default_random_engine rng(100);
+        std::uniform_int_distribution<int> dstr(test_min, test_max);
+        double epsilon = 0.001;
+        double old_probability = 1;
+        double new_probability = 1;
+        int count = 1000;
+        int in_a_row = 0;
+        while (in_a_row <= 5) {
+            unsigned good = 0;
+            for (unsigned cnt = 0; cnt != count; ++cnt)
+                if (s.contains(dstr(rng))) ++good;
+            new_probability = static_cast<double>(good) / static_cast<double>(count);
+            if (abs(new_probability - old_probability) < epsilon)
+            {
+                in_a_row++;
+            }
+            else
+            {
+                in_a_row = 0;
+            }
+            count += 100;
+            old_probability = new_probability;
+        }
+        std::cout << "Probability converges at test_count = " << count << '\n';
+    }
 };
 
 template<class T>
@@ -85,13 +112,14 @@ int main(int argc, const char* argv[]) {
         measure(i, s);
     }*/
 
-    for (size_t i = 100; i < 100000; i += 100)
+    /*for (size_t i = 100; i < 100000; i += 100)
     {
         measure(i, ss);
-    }
+    }*/
 
     //measure(1000000, ss);
 
+    pt.convergence_test(s);
 
     std::cout << pt(d) << std::endl;
     std::cout << pt(s) << std::endl;
